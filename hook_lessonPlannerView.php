@@ -43,8 +43,8 @@ if (isActionAccessible($guid, $connection2, '/modules/Planner/planner_view_full.
     $live_session_qry->execute();
     $recorded_session_qry = $connection2->prepare($recorded_session_sql);
     $recorded_session_qry->execute();
-    $live_gibbonActionID = $live_session_qry->fetch()["gibbonActionID"];
-    $recorded_gibbonActionID = $recorded_session_qry->fetch()["gibbonActionID"];
+    $live_gibbonActionID = $live_session_qry->fetch()["gibbonActionID"] ?? 'NULL';
+    $recorded_gibbonActionID = $recorded_session_qry->fetch()["gibbonActionID"] ?? 'NULL';
     // Get permission for person's role and video chat type
     $perm_person_live_sql = 'SELECT permissionID FROM gibbonpermission WHERE gibbonRoleID=' . $session->get('gibbonRoleIDCurrent') . ' AND gibbonActionID=' . $live_gibbonActionID;
     $perm_person_live_qry = $connection2->prepare($perm_person_live_sql);
