@@ -23,7 +23,7 @@ For support visit [https://gibbonedu.org/support](https://gibbonedu.org/support)
 
 ## Compatibility
 
-* v1.0.00 supports Gibbon v25+
+* v1.0.01 supports Gibbon v25+
 
 ## License
 
