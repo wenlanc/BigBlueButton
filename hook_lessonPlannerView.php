@@ -29,7 +29,7 @@ use BigBlueButton\Parameters\GetRecordingsParameters;
 global $session, $container, $page;
 
 if (isActionAccessible($guid, $connection2, '/modules/Planner/planner_view_full.php') == false) {
-    //Acess denied
+    //Access denied
     echo "<div class='error'>";
     echo __('Your request failed because you do not have access to this action.');
     echo '</div>';
@@ -37,8 +37,8 @@ if (isActionAccessible($guid, $connection2, '/modules/Planner/planner_view_full.
     $settingGateway = $container->get(SettingGateway::class);
     $enableBigBlueButton = $settingGateway->getSettingByScope('BigBlueButton', 'enableBigBlueButton', true);
     // Get gibbonActionIDs for 2 kind of BBB video chat
-    $live_session_sql = 'SELECT gibbonActionID FROM gibbonaction WHERE name = "View live sessions"';
-    $recorded_session_sql = 'SELECT gibbonActionID FROM gibbonaction WHERE name = "View recorded sessions"';
+    $live_session_sql = 'SELECT gibbonActionID FROM gibbonAction WHERE name = "View live sessions"';
+    $recorded_session_sql = 'SELECT gibbonActionID FROM gibbonAction WHERE name = "View recorded sessions"';
     $live_session_qry = $connection2->prepare($live_session_sql);
     $live_session_qry->execute();
     $recorded_session_qry = $connection2->prepare($recorded_session_sql);
@@ -46,11 +46,11 @@ if (isActionAccessible($guid, $connection2, '/modules/Planner/planner_view_full.
     $live_gibbonActionID = $live_session_qry->fetch()["gibbonActionID"] ?? 'NULL';
     $recorded_gibbonActionID = $recorded_session_qry->fetch()["gibbonActionID"] ?? 'NULL';
     // Get permission for person's role and video chat type
-    $perm_person_live_sql = 'SELECT permissionID FROM gibbonpermission WHERE gibbonRoleID=' . $session->get('gibbonRoleIDCurrent') . ' AND gibbonActionID=' . $live_gibbonActionID;
+    $perm_person_live_sql = 'SELECT permissionID FROM gibbonPermission WHERE gibbonRoleID=' . $session->get('gibbonRoleIDCurrent') . ' AND gibbonActionID=' . $live_gibbonActionID;
     $perm_person_live_qry = $connection2->prepare($perm_person_live_sql);
     $perm_person_live_qry->execute();
     $perm_person_live = $perm_person_live_qry->rowCount();
-    $perm_person_recorded_sql = 'SELECT permissionID FROM gibbonpermission WHERE gibbonRoleID=' . $session->get('gibbonRoleIDCurrent') . ' AND gibbonActionID=' . $recorded_gibbonActionID;
+    $perm_person_recorded_sql = 'SELECT permissionID FROM gibbonPermission WHERE gibbonRoleID=' . $session->get('gibbonRoleIDCurrent') . ' AND gibbonActionID=' . $recorded_gibbonActionID;
     $perm_person_recorded_qry = $connection2->prepare($perm_person_recorded_sql);
     $perm_person_recorded_qry->execute();
     $perm_person_recorded = $perm_person_recorded_qry->rowCount();
