@@ -13,7 +13,7 @@ Then please install BigBlueButton with composer by running the following inside 
 
 `composer install`
 
-And then please add following on bigbluebutton server in `/usr/share/bbb-web/WEB-INF/classes/bigbluebutton.properties`
+And then please add following on bigbluebutton server in `/usr/share/bbb-web/WEB-INF/classes/bigbluebutton.properties` or `/etc/bigbluebutton/bbb-web.properties`
 
 `allowRequestsWithoutSession=true`
 
