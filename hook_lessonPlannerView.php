@@ -106,7 +106,7 @@ if (isActionAccessible($guid, $connection2, '/modules/Planner/planner_view_full.
                                 $meeting_html = "<IFRAME src='".$bbbMeetingUrl."' allow='geolocation *; microphone *; camera *; display-capture *;' allowFullScreen='true' webkitallowfullscreen='true' mozallowfullscreen='true' sandbox='allow-same-origin allow-scripts allow-modals allow-forms allow-top-navigation' style='width:100%;height:100%;border:0' scrolling='no'></IFRAME>";
                             }
                         } catch (\Exception $e) {
-                            $meeting_html = "BBB server is not working. Please contact with administrator.";
+                            $meeting_html = "BBB server is not working. Please contact the administrator.";
                         }
                     } else {
                         $meeting_html = "You don't have permission to view live sessions.";
@@ -133,7 +133,7 @@ if (isActionAccessible($guid, $connection2, '/modules/Planner/planner_view_full.
                                 $meeting_html = $response->getMessage();
                             }
                         } catch (\Exception $e) {
-                            $meeting_html = "BBB server is not working. Please contact with administrator.";
+                            $meeting_html = "BBB server is not working. Please contact the administrator.";
                         }
                     } else {
                         $meeting_html = "You don't have permission to view recorded sessions.";
