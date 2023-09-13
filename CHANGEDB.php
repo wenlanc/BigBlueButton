@@ -5,4 +5,5 @@ $sql = [];
 $count = 0;
 
 //v1.0.01 - Separate the BBB video chat permission
-$sql[$count][0] = "1.0.01";
+//v1.0.02 - Fixed capitalisation in SQL calls
+$sql[$count][0] = "1.0.02";
