@@ -1,6 +1,6 @@
 # BigBlueButton
 
-Module of [Gibbon][gibbon]. Allows schools to include bbb video meeting in the lesson.
+Module for [Gibbon][gibbon]. Allows schools to include bbb video meetings in their lessons.
 
 [gibbon]: https://gibbonedu.org
 
@@ -9,15 +9,13 @@ Module of [Gibbon][gibbon]. Allows schools to include bbb video meeting in the l
 To install, just copy this folder into `GIBBON_HOME/modules` so that this file
 exists: `GIBBON_HOME/modules/BigBlueButton/manifest.php`.
 
-Then please install bigbluebutton by composer.
+Then please install BigBlueButton with composer by running the following inside the bigbluebutton directory:
 
-composer require bigbluebutton/bigbluebutton-api-php:~2.0.0
+`composer install`
 
-And then please add following on bigbluebutton server
+And then please add following on bigbluebutton server in `/usr/share/bbb-web/WEB-INF/classes/bigbluebutton.properties`
 
-/usr/share/bbb-web/WEB-INF/classes/bigbluebutton.properties
-
-allowRequestsWithoutSession=true
+`allowRequestsWithoutSession=true`
 
 For support visit [https://gibbonedu.org/support](https://gibbonedu.org/support).
 
@@ -27,4 +25,4 @@ For support visit [https://gibbonedu.org/support](https://gibbonedu.org/support)
 
 ## License
 
-This module is licensed to the GPLv3.
+This module is licensed under GPLv3.
