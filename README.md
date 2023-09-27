@@ -11,7 +11,7 @@ exists: `GIBBON_HOME/modules/BigBlueButton/manifest.php`.
 
 Then please install BigBlueButton with composer by running the following inside the BigBlueButton module directory:
 
-`cd GIBBON_HOME/modules/BigBlueButton`
+`cd GIBBON_HOME/modules/BigBlueButton`  
 `composer install`
 
 And then please add following on bigbluebutton server in `/usr/share/bbb-web/WEB-INF/classes/bigbluebutton.properties` or `/etc/bigbluebutton/bbb-web.properties`
