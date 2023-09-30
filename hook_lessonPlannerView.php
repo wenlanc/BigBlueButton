@@ -72,7 +72,7 @@ if (isActionAccessible($guid, $connection2, '/modules/Planner/planner_view_full.
                 $meeting_window_height = 0;
                 //checking planer status 
                 if ((date('H:i:s', strtotime('10 minutes')) >= $values['timeStart']) and (date('H:i:s', strtotime('-10 minutes')) <= $values['timeEnd']) and $values['date'] == date('Y-m-d')) {
-                    if ($perm_person_live > 0) {
+                    if ($perm_person_live > 0 && $hook['name'] == "View live sessions") {
                         // Init BigBlueButton API
                         try {
                             $bbb = new BigBlueButton();
@@ -109,10 +109,10 @@ if (isActionAccessible($guid, $connection2, '/modules/Planner/planner_view_full.
                             $meeting_html = "BBB server is not working. Please contact the administrator.";
                         }
                     } else {
-                        $meeting_html = "You don't have permission to view live sessions.";
+                        return;
                     }
                 }else if ((($values['date']) == date('Y-m-d') and (date('H:i:s', strtotime('-10 minutes')) > $values['timeEnd'])) or ($values['date']) < date('Y-m-d')) {
-                    if ($perm_person_recorded > 0) {
+                    if ($perm_person_recorded > 0 && $hook['name'] == "View recorded sessions") {
                         $recordingParams = new GetRecordingsParameters();
                         $recordingParams->setMeetingId($meetingId);
                         try {
@@ -136,7 +136,7 @@ if (isActionAccessible($guid, $connection2, '/modules/Planner/planner_view_full.
                             $meeting_html = "BBB server is not working. Please contact the administrator.";
                         }
                     } else {
-                        $meeting_html = "You don't have permission to view recorded sessions.";
+                        return;
                     }
                 }else {
                     $meeting_html = "The meeting hasn't started yet.";

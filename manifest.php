@@ -25,7 +25,7 @@ $description = 'A module to support BigBlueButton Integration.';            // S
 $entryURL = "bbb_settings.php";
 $type = "Additional";
 $category = "Admin";
-$version = "1.0.03";
+$version = "1.0.04";
 $author = "Wenlan Cui";
 $url = "";
 
@@ -94,8 +94,8 @@ $actionRows[2]['categoryPermissionOther'] = 'Y';
 //Hooks
 $array = array();
 $array['sourceModuleName'] = 'BigBlueButton';
-$array['sourceModuleAction'] = 'View live sessions';
+$array['sourceModuleAction'] = $actionRows[1]['name'];
 $array['sourceModuleInclude'] = 'hook_lessonPlannerView.php';
-$hooks[0] = "INSERT INTO `gibbonHook` (`gibbonHookID`, `name`, `type`, `options`, gibbonModuleID) VALUES (NULL, 'ViewLiveSession', 'Lesson Planner', '".serialize($array)."', (SELECT gibbonModuleID FROM gibbonModule WHERE name='$name'));";
-$array['sourceModuleAction'] = 'View recorded sessions';
-$hooks[1] = "INSERT INTO `gibbonHook` (`gibbonHookID`, `name`, `type`, `options`, gibbonModuleID) VALUES (NULL, 'ViewRecordedSession', 'Lesson Planner', '".serialize($array)."', (SELECT gibbonModuleID FROM gibbonModule WHERE name='$name'));";
+$hooks[0] = "INSERT INTO `gibbonHook` (`gibbonHookID`, `name`, `type`, `options`, gibbonModuleID) VALUES (NULL, '".$array['sourceModuleAction']."', 'Lesson Planner', '".serialize($array)."', (SELECT gibbonModuleID FROM gibbonModule WHERE name='$name'));";
+$array['sourceModuleAction'] = $actionRows[2]['name'];
+$hooks[1] = "INSERT INTO `gibbonHook` (`gibbonHookID`, `name`, `type`, `options`, gibbonModuleID) VALUES (NULL, '".$array['sourceModuleAction']."', 'Lesson Planner', '".serialize($array)."', (SELECT gibbonModuleID FROM gibbonModule WHERE name='$name'));";
