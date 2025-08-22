@@ -87,7 +87,8 @@ if (isActionAccessible($guid, $connection2, '/modules/Planner/planner_view_full.
                                                             ->setRecord(true)
                                                             ->setDuration($duration > 0 ? $duration : 120)
                                                             ->setAllowStartStopRecording(true)
-                                                            ->setAutoStartRecording(true);
+                                                            ->setAutoStartRecording(true)
+                                                            ->setLogoutUrl($session->get('absoluteURL') . '/modules/BigBlueButton/return.php');
                                 $create_response = $bbb->createMeeting($createParams);
                                 if ($create_response->getReturnCode() == 'FAILED') {
                                     $meeting_html = $create_response->getMessage();
