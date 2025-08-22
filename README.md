@@ -23,8 +23,10 @@ For support visit [https://gibbonedu.org/support](https://gibbonedu.org/support)
 
 ## Compatibility
 
-* v1.0.04 supports Gibbon v25+
+* v1.0.1 supports Gibbon v25+
 
 ## License
 
 This module is licensed under GPLv3.
+
+https://github.com/wenlanc/BigBlueButton
