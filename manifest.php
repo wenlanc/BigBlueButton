@@ -25,7 +25,7 @@ $description = 'A module to support BigBlueButton Integration.';            // S
 $entryURL = "bbb_settings.php";
 $type = "Additional";
 $category = "Admin";
-$version = "1.0.04";
+$version = "1.0.1";
 $author = "Wenlan Cui";
 $url = "";
 
