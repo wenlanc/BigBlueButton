@@ -139,8 +139,10 @@ if (isActionAccessible($guid, $connection2, '/modules/Planner/planner_view_full.
                     } else {
                         return;
                     }
-                }else {
-                    $meeting_html = "The meeting hasn't started yet.";
+                } else {
+                    if ($hook['name'] == "View live sessions") {
+                        $meeting_html = "The meeting hasn't started yet."; 
+                    } else { return; }
                 }
 
                 echo "<h2>".__('Video Chat').'</h2>';
