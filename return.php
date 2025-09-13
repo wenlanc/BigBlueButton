@@ -27,7 +27,7 @@ if (isActionAccessible($guid, $connection2, '/modules/Planner/planner_view_full.
 
         .container {
             text-align: center;
-            background: #263B81;
+            background: #06172A;
             padding: 40px;
             border-radius: 12px;
         }
