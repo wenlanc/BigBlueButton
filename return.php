@@ -21,7 +21,7 @@ if (isActionAccessible($guid, $connection2, '/modules/Planner/planner_view_full.
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #263B81;
+            background: #06172A;
             font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
         }
 
