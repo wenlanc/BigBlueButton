@@ -36,6 +36,9 @@ $gibbonSetting[2] = "INSERT INTO `gibbonSetting` (`gibbonSettingID` ,`scope` ,`n
 $gibbonSetting[3] = "INSERT INTO `gibbonCustomField`(`context`,`name`,`active`,`description`,`type`,`options`,`required`,`hidden`,`heading`,`sequenceNumber`)
 SELECT 'Lesson Plan','Video Chat','N','BigBlueButton session will be linked to this lesson.','checkboxes','Include','N','N','Basic Information',1
 WHERE NOT EXISTS(SELECT 1 FROM `gibbonCustomField` WHERE `name` = 'Video Chat' );";
+$gibbonSetting[4] = "INSERT INTO `gibbonCustomField`(`context`,`name`,`active`,`description`,`type`,`options`,`required`,`hidden`,`heading`,`sequenceNumber`)
+SELECT 'Lesson Plan','Presentation Only','N','Only show the presentation recording without transcripts or summaries.','checkboxes','Yes','N','N','Basic Information',2
+WHERE NOT EXISTS(SELECT 1 FROM `gibbonCustomField` WHERE `name` = 'Presentation Only' );";
 
 //Action rows
 $actionRows[0]['name'] = "BigBlueButton Settings";
