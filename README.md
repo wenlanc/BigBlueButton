@@ -21,9 +21,13 @@ And then please add following on bigbluebutton server in `/usr/share/bbb-web/WEB
 
 For support visit [https://gibbonedu.org/support](https://gibbonedu.org/support).
 
+## Note:
+
+Supports displaying transcripts and summaries of classes when used in conjunction with: [https://github.com/fvlasie/bbb-transcript-and-summary](https://github.com/fvlasie/bbb-transcript-and-summary)
+
 ## Compatibility
 
-* v1.0.1 supports Gibbon v25+
+* v1.5 supports Gibbon v25+
 
 ## License
 
