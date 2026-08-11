@@ -58,7 +58,7 @@ if (isActionAccessible($guid, $connection2, '/modules/Planner/planner_view_full.
     <div class="container">
         <div class="message">
             <div class="spinner"></div>
-The video session has ended, and the recording is currently being processed.<br> It will be available shortly after a quick polish.</div>
+The video session has ended, and the recording is currently being processed.<br> It will be available after processing and a quick polish.</div>
     </div>
 </body>
 </html>

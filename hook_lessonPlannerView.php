@@ -172,6 +172,20 @@ if (isActionAccessible($guid, $connection2, '/modules/Planner/planner_view_full.
                                         }
                                     }
                                     
+                                    // Reorder formats so presentation is first
+                                    $presentationKey = null;
+                                    foreach ($formats as $formatName => $formatUrl) {
+                                        if (strpos($formatName, 'presentation') !== false) {
+                                            $presentationKey = $formatName;
+                                            break;
+                                        }
+                                    }
+                                    if ($presentationKey !== null) {
+                                        $presentationFormatUrl = $formats[$presentationKey];
+                                        unset($formats[$presentationKey]);
+                                        $formats = array($presentationKey => $presentationFormatUrl) + $formats;
+                                    }
+
                                     // Display available formats as tabs
                                     if (!empty($formats)) {
                                         $activeFormat = key($formats); // Use first format as default
