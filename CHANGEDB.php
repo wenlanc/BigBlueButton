@@ -9,3 +9,27 @@ $count = 0;
 //v1.0.03 - Fixed bugs on hook of lesson planner
 //v1.0.04 - Fixed bugs on duplicated meetings for multi hooks of lesson planner
 $sql[$count][0] = "1.0.04";
+$sql[$count][1] = "";
+
+//v1.5 - Presentation Only custom field (install-only until this file was updated)
+++$count;
+$sql[$count][0] = "1.5";
+$sql[$count][1] = "
+INSERT INTO `gibbonCustomField`(`context`,`name`,`active`,`description`,`type`,`options`,`required`,`hidden`,`heading`,`sequenceNumber`)
+SELECT 'Lesson Plan','Presentation Only','N','Only show the presentation recording without transcripts or summaries.','checkboxes','Yes','N','N','Basic Information',2
+WHERE NOT EXISTS(SELECT 1 FROM `gibbonCustomField` WHERE `name` = 'Presentation Only');end
+";
+
+//v1.5.1
+++$count;
+$sql[$count][0] = "1.5.1";
+$sql[$count][1] = "";
+
+//v1.5.2 - Apply Presentation Only for sites that already upgraded past 1.5 without CHANGEDB SQL
+++$count;
+$sql[$count][0] = "1.5.2";
+$sql[$count][1] = "
+INSERT INTO `gibbonCustomField`(`context`,`name`,`active`,`description`,`type`,`options`,`required`,`hidden`,`heading`,`sequenceNumber`)
+SELECT 'Lesson Plan','Presentation Only','N','Only show the presentation recording without transcripts or summaries.','checkboxes','Yes','N','N','Basic Information',2
+WHERE NOT EXISTS(SELECT 1 FROM `gibbonCustomField` WHERE `name` = 'Presentation Only');end
+";
