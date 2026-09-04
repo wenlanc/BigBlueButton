@@ -1,5 +1,6 @@
 {
     "require": {
-        "bigbluebutton/bigbluebutton-api-php": "^2.3"
+        "php": ">=8.2",
+        "bigbluebutton/bigbluebutton-api-php": "^3.0"
     }
 }

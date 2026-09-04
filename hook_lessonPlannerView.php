@@ -21,6 +21,7 @@ use Gibbon\Domain\System\CustomFieldGateway;
 
 require __DIR__ . '/vendor/autoload.php';
 use BigBlueButton\BigBlueButton;
+use BigBlueButton\Enum\Role;
 use BigBlueButton\Parameters\CreateMeetingParameters;
 use BigBlueButton\Parameters\JoinMeetingParameters;
 use BigBlueButton\Parameters\GetMeetingInfoParameters;
@@ -62,10 +63,8 @@ if (isActionAccessible($guid, $connection2, '/modules/Planner/planner_view_full.
         if ($key !== false && count($customFields) > $key && isset($customFields[$key]['gibbonCustomFieldID'])) {
             $plannerSettingFields = json_decode($values['fields'], true);
             if ($plannerSettingFields && isset($plannerSettingFields[$customFields[$key]['gibbonCustomFieldID']]) && $plannerSettingFields[$customFields[$key]['gibbonCustomFieldID']] == 'Include') {
-                $bigBlueButtonURL = $settingGateway->getSettingByScope('BigBlueButton', 'bigBlueButtonURL', '');
-                $bigBlueButtonCredentials = $settingGateway->getSettingByScope('BigBlueButton', 'bigBlueButtonCredentials', '');
-                putenv('BBB_SERVER_BASE_URL='. $bigBlueButtonURL);
-                putenv('BBB_SECRET='. $bigBlueButtonCredentials);
+                $bigBlueButtonURL = (string) $settingGateway->getSettingByScope('BigBlueButton', 'bigBlueButtonURL');
+                $bigBlueButtonCredentials = (string) $settingGateway->getSettingByScope('BigBlueButton', 'bigBlueButtonCredentials');
                 $meetingId = "planner".(int)$values['gibbonPlannerEntryID'];
                 $duration = round((strtotime($values['timeEnd']) - strtotime($values['timeStart'])) / 60) + 25;
                 $meeting_html = "";
@@ -75,16 +74,14 @@ if (isActionAccessible($guid, $connection2, '/modules/Planner/planner_view_full.
                     if ($perm_person_live > 0 && $hook['name'] == "View live sessions") {
                         // Init BigBlueButton API
                         try {
-                            $bbb = new BigBlueButton();
-                            $getMeetingInfoParams = new GetMeetingInfoParameters($meetingId, 'moderator_password');
+                            $bbb = new BigBlueButton($bigBlueButtonURL, $bigBlueButtonCredentials);
+                            $getMeetingInfoParams = new GetMeetingInfoParameters($meetingId);
                             $response = $bbb->getMeetingInfo($getMeetingInfoParams);
                 
                             if ($response->getReturnCode() == 'FAILED') {
                                 // Create the meeting
                                 $createParams = new CreateMeetingParameters($meetingId, $values['name'].' lesson');
-                                $createParams = $createParams->setModeratorPassword('moderator_password')
-                                                            ->setAttendeePassword('attendee_password')
-                                                            ->setRecord(true)
+                                $createParams = $createParams->setRecord(true)
                                                             ->setDuration($duration > 0 ? $duration : 120)
                                                             ->setAllowStartStopRecording(true)
                                                             ->setAutoStartRecording(true)
@@ -100,11 +97,10 @@ if (isActionAccessible($guid, $connection2, '/modules/Planner/planner_view_full.
                             }
                             
                             if ($meeting_window_height > 0) {
-                                $joinParams = new JoinMeetingParameters($meetingId, $session->get('preferredName').' '.$session->get('surname'), $session->get('gibbonRoleIDCurrentCategory') == 'Staff' ? 'moderator_password':'attendee_password');
-                                $joinParams->setRedirect(false);
-                                $joinResponse = $bbb->joinMeeting($joinParams);
-                                $bbbMeetingUrl = $joinResponse->getUrl();
-                                $meeting_html = "<IFRAME src='".$bbbMeetingUrl."' allow='geolocation *; microphone *; camera *; display-capture *;' allowFullScreen='true' webkitallowfullscreen='true' mozallowfullscreen='true' sandbox='allow-same-origin allow-scripts allow-modals allow-forms allow-top-navigation' style='width:100%;height:100%;border:0' scrolling='no'></IFRAME>";
+                                $joinRole = $session->get('gibbonRoleIDCurrentCategory') == 'Staff' ? Role::MODERATOR : Role::VIEWER;
+                                $joinParams = new JoinMeetingParameters($meetingId, $session->get('preferredName').' '.$session->get('surname'), $joinRole);
+                                $bbbMeetingUrl = $bbb->getJoinMeetingURL($joinParams);
+                                $meeting_html = "<IFRAME src='".htmlspecialchars($bbbMeetingUrl)."' allow='geolocation *; microphone *; camera *; display-capture *;' allowFullScreen='true' webkitallowfullscreen='true' mozallowfullscreen='true' sandbox='allow-same-origin allow-scripts allow-modals allow-forms allow-top-navigation' style='width:100%;height:100%;border:0' scrolling='no'></IFRAME>";
                             }
                         } catch (\Exception $e) {
                             $meeting_html = "BBB server is not working. Please contact the administrator.";
@@ -117,7 +113,7 @@ if (isActionAccessible($guid, $connection2, '/modules/Planner/planner_view_full.
                         $recordingParams = new GetRecordingsParameters();
                         $recordingParams->setMeetingId($meetingId);
                         try {
-                            $bbb = new BigBlueButton();
+                            $bbb = new BigBlueButton($bigBlueButtonURL, $bigBlueButtonCredentials);
                             $response = $bbb->getRecordings($recordingParams);
                             if ($response->getReturnCode() == 'SUCCESS') {
                                 $records = $response->getRecords();
@@ -127,27 +123,12 @@ if (isActionAccessible($guid, $connection2, '/modules/Planner/planner_view_full.
                                     $presentationOnlyMode = false;
                                     
                                     foreach ($records as $key => $record){
-                                        // Try new API first (getFormats), fallback to old API
-                                        if (method_exists($record, 'getFormats')) {
-                                            // New API: supports multiple formats
-                                            $playbackFormats = $record->getFormats();
-                                            if (is_array($playbackFormats)) {
-                                                foreach ($playbackFormats as $playback) {
-                                                    $format = $playback->getType();
-                                                    $playbackUrl = $playback->getUrl();
-                                                    
-                                                    if ($format && $playbackUrl) {
-                                                        $format = strtolower(trim($format));
-                                                        $formats[$format] = $playbackUrl;
-                                                    }
-                                                }
-                                            }
-                                        } else {
-                                            // Old API: only supports single format
-                                            $playbackUrl = $record->getPlaybackUrl();
-                                            $playbackType = $record->getPlaybackType();
-                                            if ($playbackUrl && $playbackType) {
-                                                $format = strtolower(trim($playbackType));
+                                        foreach ($record->getFormats() as $playback) {
+                                            $format = $playback->getType();
+                                            $playbackUrl = $playback->getUrl();
+
+                                            if ($format && $playbackUrl) {
+                                                $format = strtolower(trim($format));
                                                 $formats[$format] = $playbackUrl;
                                             }
                                         }

@@ -43,3 +43,8 @@ SELECT 'Lesson Plan','Presentation Only',IFNULL((SELECT `value` FROM `gibbonSett
 WHERE NOT EXISTS(SELECT 1 FROM `gibbonCustomField` WHERE `name` = 'Presentation Only');end
 UPDATE `gibbonCustomField` SET `active`=IFNULL((SELECT `value` FROM `gibbonSetting` WHERE `scope`='BigBlueButton' AND `name`='enableBigBlueButton' LIMIT 1),'N') WHERE `context`='Lesson Plan' AND `name`='Presentation Only';end
 ";
+
+//v1.5.4 - bigbluebutton-api-php 3.x (no schema change)
+++$count;
+$sql[$count][0] = "1.5.4";
+$sql[$count][1] = "";

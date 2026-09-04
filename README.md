@@ -28,6 +28,7 @@ Supports displaying transcripts and summaries of classes when used in conjunctio
 ## Compatibility
 
 * v1.5 supports Gibbon v25+
+* v1.5.4 requires PHP 8.2+ (`bigbluebutton/bigbluebutton-api-php` 3.x)
 
 ## License
 
