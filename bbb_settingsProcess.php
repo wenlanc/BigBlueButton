@@ -66,8 +66,12 @@ if (isActionAccessible($guid, $connection2, '/modules/BigBlueButton/bbb_settings
     // Active or diactive include video chat settings on lesson plan
     $customFieldGateway = $container->get(CustomFieldGateway::class);
     $customFields = $customFieldGateway->selectBy(['context' => 'Lesson Plan'])->fetchAll();
-    
+    $bbbFieldNames = ['Video Chat', 'Presentation Only'];
+
     foreach ($customFields as $field) {
+        if (!in_array($field['name'], $bbbFieldNames, true)) {
+            continue;
+        }
         $updated = $customFieldGateway->update($field['gibbonCustomFieldID'], ['active' => $_POST['enableBigBlueButton']]);
     }
 
