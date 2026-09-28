@@ -118,11 +118,23 @@ if (isActionAccessible($guid, $connection2, '/modules/Planner/planner_view_full.
                             if ($response->getReturnCode() == 'SUCCESS') {
                                 $records = $response->getRecords();
                                 if($records){
-                                    // Group playback formats by type (using actual format names from API)
-                                    $formats = [];
                                     $presentationOnlyMode = false;
-                                    
-                                    foreach ($records as $key => $record){
+                                    $plannerSettingFields = json_decode($values['fields'], true);
+                                    if ($plannerSettingFields) {
+                                        foreach ($customFields as $field) {
+                                            if ($field['name'] === 'Presentation Only' && isset($plannerSettingFields[$field['gibbonCustomFieldID']])) {
+                                                if ($plannerSettingFields[$field['gibbonCustomFieldID']] === 'Y' || $plannerSettingFields[$field['gibbonCustomFieldID']] === 'Yes') {
+                                                    $presentationOnlyMode = true;
+                                                }
+                                                break;
+                                            }
+                                        }
+                                    }
+
+                                    // Keep each BBB recording separate. Formats are tabs within a recording.
+                                    $recordingBlocks = [];
+                                    foreach ($records as $record) {
+                                        $formats = [];
                                         foreach ($record->getFormats() as $playback) {
                                             $format = $playback->getType();
                                             $playbackUrl = $playback->getUrl();
@@ -132,85 +144,99 @@ if (isActionAccessible($guid, $connection2, '/modules/Planner/planner_view_full.
                                                 $formats[$format] = $playbackUrl;
                                             }
                                         }
-                                    }
-                                    
-                                    // Check if teacher wants presentation only
-                                    $plannerSettingFields = json_decode($values['fields'], true);
-                                    if ($plannerSettingFields) {
-                                        foreach ($customFields as $field) {
-                                            if ($field['name'] === 'Presentation Only' && isset($plannerSettingFields[$field['gibbonCustomFieldID']])) {
-                                                if ($plannerSettingFields[$field['gibbonCustomFieldID']] === 'Y' || $plannerSettingFields[$field['gibbonCustomFieldID']] === 'Yes') {
-                                                    $presentationOnlyMode = true;
-                                                    // Keep only presentation format
-                                                    foreach ($formats as $formatName => $formatUrl) {
-                                                        if (strpos($formatName, 'presentation') === false) {
-                                                            unset($formats[$formatName]);
-                                                        }
-                                                    }
+
+                                        if ($presentationOnlyMode) {
+                                            foreach ($formats as $formatName => $formatUrl) {
+                                                if (strpos($formatName, 'presentation') === false) {
+                                                    unset($formats[$formatName]);
                                                 }
+                                            }
+                                        }
+
+                                        $presentationKey = null;
+                                        foreach ($formats as $formatName => $formatUrl) {
+                                            if (strpos($formatName, 'presentation') !== false) {
+                                                $presentationKey = $formatName;
                                                 break;
                                             }
                                         }
-                                    }
-                                    
-                                    // Reorder formats so presentation is first
-                                    $presentationKey = null;
-                                    foreach ($formats as $formatName => $formatUrl) {
-                                        if (strpos($formatName, 'presentation') !== false) {
-                                            $presentationKey = $formatName;
-                                            break;
+                                        if ($presentationKey !== null) {
+                                            $presentationFormatUrl = $formats[$presentationKey];
+                                            unset($formats[$presentationKey]);
+                                            $formats = array($presentationKey => $presentationFormatUrl) + $formats;
                                         }
-                                    }
-                                    if ($presentationKey !== null) {
-                                        $presentationFormatUrl = $formats[$presentationKey];
-                                        unset($formats[$presentationKey]);
-                                        $formats = array($presentationKey => $presentationFormatUrl) + $formats;
+
+                                        if (!empty($formats)) {
+                                            $recordingBlocks[] = [
+                                                'id' => $record->getRecordId(),
+                                                'startTime' => $record->getStartTime(),
+                                                'formats' => $formats,
+                                            ];
+                                        }
                                     }
 
-                                    // Display available formats as tabs
-                                    if (!empty($formats)) {
-                                        $activeFormat = key($formats); // Use first format as default
-                                        
-                                        // Create tab buttons (only show tabs if more than one format)
-                                        if (count($formats) > 1) {
-                                            $meeting_html .= "<div style='margin-bottom: 10px; border-bottom: 2px solid #ddd;'>";
-                                            
+                                    usort($recordingBlocks, function ($a, $b) {
+                                        return $a['startTime'] <=> $b['startTime'];
+                                    });
+
+                                    if (!empty($recordingBlocks)) {
+                                        $meeting_window_height = 0;
+                                        $showRecordingLabels = count($recordingBlocks) > 1;
+
+                                        foreach ($recordingBlocks as $recordingIndex => $recordingBlock) {
+                                            $formats = $recordingBlock['formats'];
+                                            $recordSlug = preg_replace('/[^a-z0-9]/', '-', strtolower((string) $recordingBlock['id']));
+                                            if ($recordSlug === '') {
+                                                $recordSlug = 'recording-'.($recordingIndex + 1);
+                                            }
+                                            $activeFormat = key($formats);
+
+                                            if ($showRecordingLabels) {
+                                                $recordingLabel = __('Recording').' '.($recordingIndex + 1);
+                                                if ($recordingBlock['startTime'] > 0) {
+                                                    $recordingLabel .= ' ('.date('g:i A', (int) round($recordingBlock['startTime'] / 1000)).')';
+                                                }
+                                                $meeting_html .= "<h4 style='margin: ".($recordingIndex === 0 ? '0' : '16px')." 0 8px;'>".htmlspecialchars($recordingLabel, ENT_QUOTES, 'UTF-8')."</h4>";
+                                                $meeting_window_height += 40;
+                                            }
+
+                                            if (count($formats) > 1) {
+                                                $meeting_html .= "<div style='margin-bottom: 10px; border-bottom: 2px solid #ddd;'>";
+
+                                                foreach ($formats as $formatName => $formatUrl) {
+                                                    $isActive = ($formatName === $activeFormat);
+                                                    $displayName = ucfirst(str_replace('-', ' ', $formatName));
+                                                    $formatSlug = preg_replace('/[^a-z0-9]/', '-', $formatName);
+                                                    $buttonId = 'btn-'.$recordSlug.'-'.$formatSlug;
+
+                                                    $meeting_html .= "<button onclick=\"";
+                                                    foreach ($formats as $fname => $furl) {
+                                                        $divId = 'bbb-format-'.$recordSlug.'-'.preg_replace('/[^a-z0-9]/', '-', $fname);
+                                                        $meeting_html .= "document.getElementById('".$divId."').style.display='none'; ";
+                                                    }
+                                                    $meeting_html .= "document.getElementById('bbb-format-".$recordSlug."-".$formatSlug."').style.display='block'; ";
+                                                    foreach ($formats as $fname => $furl) {
+                                                        $bid = 'btn-'.$recordSlug.'-'.preg_replace('/[^a-z0-9]/', '-', $fname);
+                                                        $meeting_html .= "document.getElementById('".$bid."').style.borderBottom='1px solid #ddd'; ";
+                                                    }
+                                                    $meeting_html .= "this.style.borderBottom='3px solid #0066cc';";
+                                                    $meeting_html .= "\" id='".$buttonId."' style='padding: 10px 20px; background: white; border: 1px solid #ddd; cursor: pointer; font-weight: bold; border-bottom: ".($isActive ? "3px solid #0066cc" : "1px solid #ddd").";'>".htmlspecialchars(__($displayName), ENT_QUOTES, 'UTF-8')."</button>";
+                                                }
+
+                                                $meeting_html .= "</div>";
+                                            }
+
                                             foreach ($formats as $formatName => $formatUrl) {
                                                 $isActive = ($formatName === $activeFormat);
-                                                $displayName = ucfirst(str_replace('-', ' ', $formatName));
-                                                $buttonId = 'btn-' . preg_replace('/[^a-z0-9]/', '-', $formatName);
-                                                
-                                                $meeting_html .= "<button onclick=\"";
-                                                // Hide all divs
-                                                foreach ($formats as $fname => $furl) {
-                                                    $divId = 'bbb-format-' . preg_replace('/[^a-z0-9]/', '-', $fname);
-                                                    $meeting_html .= "document.getElementById('" . $divId . "').style.display='none'; ";
-                                                }
-                                                // Show this one
-                                                $meeting_html .= "document.getElementById('bbb-format-" . preg_replace('/[^a-z0-9]/', '-', $formatName) . "').style.display='block'; ";
-                                                // Reset all button styles
-                                                foreach ($formats as $fname => $furl) {
-                                                    $bid = 'btn-' . preg_replace('/[^a-z0-9]/', '-', $fname);
-                                                    $meeting_html .= "document.getElementById('" . $bid . "').style.borderBottom='1px solid #ddd'; ";
-                                                }
-                                                // Activate this button
-                                                $meeting_html .= "this.style.borderBottom='3px solid #0066cc';";
-                                                $meeting_html .= "\" id='" . $buttonId . "' style='padding: 10px 20px; background: white; border: 1px solid #ddd; cursor: pointer; font-weight: bold; border-bottom: " . ($isActive ? "3px solid #0066cc" : "1px solid #ddd") . ";'>" . __($displayName) . "</button>";
+                                                $formatSlug = preg_replace('/[^a-z0-9]/', '-', $formatName);
+                                                $divId = 'bbb-format-'.$recordSlug.'-'.$formatSlug;
+                                                $meeting_html .= "<div id='".$divId."' style='width:100%; display:".($isActive ? "block" : "none").";'>";
+                                                $meeting_html .= "<IFRAME src='".htmlspecialchars($formatUrl)."' allow='geolocation *; microphone *; camera *; display-capture *;' allowFullScreen='true' webkitallowfullscreen='true' mozallowfullscreen='true' sandbox='allow-same-origin allow-scripts allow-modals allow-forms' style='width:100%;height:500px;border:0;overflow:auto;' scrolling='yes'></IFRAME>";
+                                                $meeting_html .= "</div>";
                                             }
-                                            
-                                            $meeting_html .= "</div>";
+
+                                            $meeting_window_height += (count($formats) > 1 ? 560 : 500);
                                         }
-                                        
-                                        // Display format containers
-                                        foreach ($formats as $formatName => $formatUrl) {
-                                            $isActive = ($formatName === $activeFormat);
-                                            $divId = 'bbb-format-' . preg_replace('/[^a-z0-9]/', '-', $formatName);
-                                            $meeting_html .= "<div id='" . $divId . "' style='width:100%; display:" . ($isActive ? "block" : "none") . ";'>";
-                                            $meeting_html .= "<IFRAME src='" . htmlspecialchars($formatUrl) . "' allow='geolocation *; microphone *; camera *; display-capture *;' allowFullScreen='true' webkitallowfullscreen='true' mozallowfullscreen='true' sandbox='allow-same-origin allow-scripts allow-modals allow-forms' style='width:100%;height:500px;border:0;overflow:auto;' scrolling='yes'></IFRAME>";
-                                            $meeting_html .= "</div>";
-                                        }
-                                        
-                                        $meeting_window_height = 550;
                                     } else {
                                         $meeting_html = __('No compatible recording formats found.');
                                     }
